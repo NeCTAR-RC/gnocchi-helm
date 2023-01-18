@@ -1,0 +1,95 @@
+{{- include "nectarlib.configmap" (list . "gnocchi.configmap") -}}
+{{- define "gnocchi.configmap" -}}
+data:
+  api_paste.ini: |-
+    [composite:gnocchi+basic]
+    use = egg:Paste#urlmap
+    / = gnocchiversions_pipeline
+    /v1 = gnocchiv1+noauth
+    /healthcheck = healthcheck
+
+    [composite:gnocchi+keystone]
+    use = egg:Paste#urlmap
+    / = gnocchiversions_pipeline
+    /v1 = gnocchiv1+keystone
+    /healthcheck = healthcheck
+
+    [composite:gnocchi+remoteuser]
+    use = egg:Paste#urlmap
+    / = gnocchiversions_pipeline
+    /v1 = gnocchiv1+noauth
+    /healthcheck = healthcheck
+
+    [pipeline:gnocchiv1+noauth]
+    pipeline = http_proxy_to_wsgi gnocchiv1
+
+    [pipeline:gnocchiv1+keystone]
+    pipeline = http_proxy_to_wsgi keystone_authtoken gnocchiv1
+
+    [pipeline:gnocchiversions_pipeline]
+    pipeline = http_proxy_to_wsgi gnocchiversions
+
+    [app:gnocchiversions]
+    paste.app_factory = gnocchi.rest.app:app_factory
+    root = gnocchi.rest.api.VersionsController
+
+    [app:gnocchiv1]
+    paste.app_factory = gnocchi.rest.app:app_factory
+    root = gnocchi.rest.api.V1Controller
+
+    [filter:keystone_authtoken]
+    use = egg:keystonemiddleware#auth_token
+    oslo_config_project = gnocchi
+
+    [filter:http_proxy_to_wsgi]
+    use = egg:oslo.middleware#http_proxy_to_wsgi
+    oslo_config_project = gnocchi
+
+    [app:healthcheck]
+    use = egg:oslo.middleware#healthcheck
+    oslo_config_project = gnocchi
+
+  policy.json: |-
+    {
+      "admin_or_creator": "role:admin or user:%(creator)s or project_id:%(created_by_project_id)s",
+      "resource_owner": "project_id:%(project_id)s",
+      "metric_owner": "project_id:%(resource.project_id)s",
+      "read_only": "role:monitoring or role:read_only or role:helpdesk",
+      "get status": "role:admin",
+
+      "create resource": "",
+      "get resource": "rule:admin_or_creator or rule:resource_owner or rule:read_only",
+      "update resource": "rule:admin_or_creator",
+      "delete resource": "rule:admin_or_creator",
+      "delete resources": "rule:admin_or_creator",
+      "list resource": "rule:admin_or_creator or rule:resource_owner or rule:read_only",
+      "search resource": "rule:admin_or_creator or rule:resource_owner or rule:read_only",
+
+      "create resource type": "role:admin",
+      "delete resource type": "role:admin",
+      "update resource type": "role:admin",
+      "list resource type": "",
+      "get resource type": "",
+
+      "get archive policy": "",
+      "list archive policy": "",
+      "create archive policy": "role:admin",
+      "update archive policy": "role:admin",
+      "delete archive policy": "role:admin",
+
+      "create archive policy rule": "role:admin",
+      "get archive policy rule": "",
+      "list archive policy rule": "",
+      "update archive policy rule": "role:admin",
+      "delete archive policy rule": "role:admin",
+
+      "create metric": "",
+      "delete metric": "rule:admin_or_creator",
+      "get metric": "rule:admin_or_creator or rule:metric_owner or rule:read_only",
+      "search metric": "rule:admin_or_creator or rule:metric_owner or rule:read_only",
+      "list metric": "rule:admin_or_creator or rule:metric_owner or rule:read_only",
+
+      "get measures":  "rule:admin_or_creator or rule:metric_owner or rule:read_only",
+      "post measures":  "rule:admin_or_creator"
+    }
+{{- end -}}

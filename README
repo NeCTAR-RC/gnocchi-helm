@@ -1,0 +1,38 @@
+Gnocchi Helm Chart
+===================
+
+Setup
+-----
+
+Vault
+-----
+You need to create a secret in vault with the following keys
+ * url
+ * keystone_password
+ * influxdb_password
+
+Refer to the secret in your values
+
+vault:
+  settings_secret: secret/data/k8s/<namespace>/gnocchi/settings
+
+
+Gnocchi settings example:
+-----------------
+ conf:
+    api:
+      max_limit: 3000
+    cors:
+      allowed_origin: https://host
+    keystone:
+      auth_url: https://keystone:5000
+      memcached_servers:
+         - mc1:11211
+         - mc2:11211
+      www_authenticate_uri: https://keystone:5000
+    storage:
+      influxdb_host: influxdb
+      influxdb_port: 8086
+      influxdb_username: gnocchi
+      influxdb_database: gnocchi
+      influxdb_batch_size: 50
