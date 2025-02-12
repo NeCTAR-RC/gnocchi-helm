@@ -13,6 +13,8 @@ api:
     - kolla_httpd_start
   apache:
     enabled: true
+    timeout: 3600
+    extra_config: "restart-interval=86400 graceful-timeout=43200"
   image:
     repository: "registry.rc.nectar.org.au/kolla/ubuntu-source-gnocchi-api"
   pdb:
