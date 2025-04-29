@@ -50,6 +50,12 @@ api:
     hostname: chart-example.local
     parentRefs:
       - name: default
+  volume_mounts:
+    - name: tmp
+      mountPath: /tmp
+  volumes:
+    - name: tmp
+      emptyDir: {}
 
 conf:
   debug: false
