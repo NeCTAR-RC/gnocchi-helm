@@ -2,7 +2,7 @@ apiVersion: v2
 name: gnocchi
 description: A Helm chart for Openstack Gnocchi
 type: application
-version: 1.0.1
+version: 1.0.2
 appVersion: "b9da55745da19-4.2.4-25-g9c32e839"
 sources:
   - https://github.com/NeCTAR-RC/gnocchi-helm.git
