@@ -13,6 +13,7 @@ allowed_origin = {{ .Values.conf.cors.allowed_origin }}
 auth_protocol = http
 auth_type = password
 auth_url = {{ .Values.conf.keystone_authtoken.auth_url }}
+service_type = metric
 
 {{- if .Values.conf.keystone_authtoken.memcached_servers }}
 memcached_servers={{ join "," .Values.conf.keystone_authtoken.memcached_servers }}
