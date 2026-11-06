@@ -29,6 +29,20 @@ api:
     values: []
   affinity: {}
   resources: {}
+  # Probe timing; needs nectarlib >= 4.5.0 (older versions ignore it).
+  # The indexer is one shared MariaDB, so a lock or stall there blocks
+  # every api pod at once. The Kubernetes defaults (1 s timeout, 3
+  # failures) restarted all replicas 30 s into a 60 s stall on
+  # 6 Nov 2026. Give a stall about 90 s before kubelet restarts pods
+  # or takes them out of service.
+  livenessProbe:
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+  readinessProbe:
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
   gateway:
     enabled: false
     annotations: {}
